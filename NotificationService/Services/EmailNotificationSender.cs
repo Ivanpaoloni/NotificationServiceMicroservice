@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
-using NotificationService.Models;
+using NotificationService.Configuration;
 using NotificationService.Services.Interfaces;
 using System.Net;
 using System.Net.Mail;

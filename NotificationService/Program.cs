@@ -1,5 +1,6 @@
-using NotificationService.Models;
+using NotificationService.Configuration;
 using NotificationService.Services;
+using NotificationService.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,8 +13,9 @@ builder.Services.AddSwaggerGen();
 //Configure ServiceProvider
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
 builder.Services.AddScoped<EmailNotificationSender>();
-builder.Services.AddScoped<EmailNotificationSender>();
 builder.Services.AddScoped<SmsNotificationSender>();
+builder.Services.AddScoped<INotificationSenderFactory, NotificationSenderFactory>();
+builder.Services.AddScoped<INotificationService,NotificationService.Services.NotificationService>();
 
 var app = builder.Build();
 
