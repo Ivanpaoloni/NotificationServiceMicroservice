@@ -1,6 +1,10 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using NotificationService.Configuration;
 using NotificationService.Services;
 using NotificationService.Services.Interfaces;
+using NotificationService.Validations;
+using NotificationService.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,10 +18,18 @@ builder.Services.AddSwaggerGen();
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
 builder.Services.AddScoped<EmailNotificationSender>();
 builder.Services.AddScoped<SmsNotificationSender>();
+
+//Configure FluentValidation
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<NotificationRequestValidator>();
+
+//Configure DI
 builder.Services.AddScoped<INotificationSenderFactory, NotificationSenderFactory>();
-builder.Services.AddScoped<INotificationService,NotificationService.Services.NotificationService>();
+builder.Services.AddScoped<INotificationService, NotificationService.Services.NotificationService>();
 
 var app = builder.Build();
+
+app.UseExceptionHandling();
 
 app.UseSwagger();
 app.UseSwaggerUI();

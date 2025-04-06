@@ -24,13 +24,7 @@ namespace NotificationService.Controllers
 
             await _notificationService.SendAsync(request);
 
-            return Ok(new
-            {
-                status = "Sent",
-                channel = request.Channel.ToString(),
-                subject = request.Subject.ToString(),
-                message = request.Message.ToString()
-            });
+            return Ok(new { success = "true", status = "Sent", channel = request.Channel.ToString(), subject = request.Subject.ToString(), message = request.Message.ToString() });
         }
     }
 }
