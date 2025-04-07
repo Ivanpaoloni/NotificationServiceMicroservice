@@ -10,11 +10,20 @@ namespace NotificationService.Controllers
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly INotificationService _notificationService;
+        private readonly INotificationQueue _notificationQueue;
 
-        public NotificationsController(IServiceProvider serviceProvider, INotificationService notificationService)
+        public NotificationsController(IServiceProvider serviceProvider, INotificationService notificationService, INotificationQueue notificationQueue)
         {
             _serviceProvider = serviceProvider;
             _notificationService = notificationService;
+            _notificationQueue = notificationQueue;
+        }
+
+        [HttpGet("pending")]
+        public IActionResult GetPendingNotifications()
+        {
+            var pending =_notificationQueue.GetPendingNotifications();
+            return Ok(new { success = "true", status = "Pending", pending });
         }
 
         [HttpPost]
