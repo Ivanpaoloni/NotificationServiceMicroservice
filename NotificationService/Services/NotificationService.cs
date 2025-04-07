@@ -1,23 +1,28 @@
-﻿using NotificationService.Models;
+﻿using FluentValidation;
+using NotificationService.Models;
 using NotificationService.Services.Interfaces;
+using NotificationService.Validations;
 
 namespace NotificationService.Services
 {
     public class NotificationService : INotificationService
     {
-        private readonly INotificationSenderFactory _notificationSenderFactory;
         private readonly ILogger<NotificationService> _logger;
-        public NotificationService(INotificationSenderFactory notificationSenderFactory, ILogger<NotificationService> logger)
+        private readonly INotificationQueue _notificationQueue;
+        public NotificationService(ILogger<NotificationService> logger, INotificationQueue emailQueue)
         {
-            _notificationSenderFactory = notificationSenderFactory;
             _logger = logger;
+            _notificationQueue = emailQueue;
         }
 
-        public async Task SendAsync(NotificationRequest request)
+        public Task SendAsync(NotificationRequest request)
         {
-            var sender = _notificationSenderFactory.GetSender(request.Channel);
+            new NotificationRequestValidator().ValidateAndThrow(request);
+
+            _notificationQueue.Enqueue(request);
             _logger.LogInformation("Sending notification using {Channel} channel", request.Channel.ToString());
-            await sender.SendAsync(request.Recipient, request.Subject, request.Message);
+
+            return Task.CompletedTask;
         }
     }
 }
