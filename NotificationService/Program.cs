@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using NotificationService.Healthchecks;
 using HealthChecks.UI.Client;
 using NotificationService.Models;
+using NotificationService.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+//Configure DbContext
+builder.Services.AddDbContext<NotificationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 //Configure ServiceProvider
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
@@ -36,8 +43,16 @@ builder.Services.AddScoped<IValidator<NotificationRequest>, NotificationRequestV
 builder.Services.AddHealthChecks().AddCheck<CustomSmtpHealthCheck>("smtp");
 builder.Services.AddHealthChecksUI().AddInMemoryStorage();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+});
+
+
 var app = builder.Build();
 
+app.UseCors("AllowAll");
 app.UseExceptionHandling();
 
 //HealthCheck Middleware

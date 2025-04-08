@@ -1,10 +1,9 @@
 ﻿using NotificationService.Domain.Enums;
 
-namespace NotificationService.Models
+namespace NotificationService.Models.Dtos
 {
-    public class NotificationRequest
+    public class NotificationRequestDto
     {
-        public Guid Id { get; set; }
         public NotificationChannelTypeEnum Channel { get; set; }
         public string Recipient { get; set; }
         public string Subject { get; set; }

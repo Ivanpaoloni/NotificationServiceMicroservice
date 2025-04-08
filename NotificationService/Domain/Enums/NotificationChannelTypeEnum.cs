@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace NotificationService.Models
+namespace NotificationService.Domain.Enums
 {
     public enum NotificationChannelTypeEnum
     {

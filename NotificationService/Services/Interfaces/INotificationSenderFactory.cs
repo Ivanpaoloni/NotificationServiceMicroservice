@@ -1,4 +1,4 @@
-﻿using NotificationService.Models;
+﻿using NotificationService.Domain.Enums;
 
 namespace NotificationService.Services.Interfaces
 {

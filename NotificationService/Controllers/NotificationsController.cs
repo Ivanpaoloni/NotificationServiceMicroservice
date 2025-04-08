@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Humanizer;
+using Microsoft.AspNetCore.Mvc;
 using NotificationService.Models;
+using NotificationService.Models.Dtos;
 using NotificationService.Services.Interfaces;
 
 namespace NotificationService.Controllers
@@ -9,14 +11,16 @@ namespace NotificationService.Controllers
     public class NotificationsController : ControllerBase
     {
         private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<NotificationsController> _logger;
         private readonly INotificationService _notificationService;
         private readonly INotificationQueue _notificationQueue;
 
-        public NotificationsController(IServiceProvider serviceProvider, INotificationService notificationService, INotificationQueue notificationQueue)
+        public NotificationsController(IServiceProvider serviceProvider, INotificationService notificationService, INotificationQueue notificationQueue, ILogger<NotificationsController> logger)
         {
             _serviceProvider = serviceProvider;
             _notificationService = notificationService;
             _notificationQueue = notificationQueue;
+            _logger = logger;
         }
 
         [HttpGet("pending")]
@@ -25,15 +29,29 @@ namespace NotificationService.Controllers
             var pending =_notificationQueue.GetPendingNotifications();
             return Ok(new { success = "true", status = "Pending", pending });
         }
-
-        [HttpPost]
-        public async Task<IActionResult> SendNotification([FromBody] NotificationRequest request)
+        [HttpPost("send")]
+        public async Task<IActionResult> SendNotification([FromBody] NotificationRequestDto dto)
         {
-            if (request == null) return BadRequest("Invalid request");
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            await _notificationService.SendAsync(request);
+            try
+            {
+                // Llama al servicio que crea el registro en DB y encola la notificación.
+                var notificationId = await _notificationService.SendNotificationAsync(dto);
 
-            return Ok(new { success = "true", status = "Sent", channel = request.Channel.ToString(), subject = request.Subject.ToString(), message = request.Message.ToString() });
+                return Ok(new { NotificationId = notificationId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending notification");
+                return StatusCode(500, "Error al enviar la notificación");
+            }
         }
+
+        // Podrías agregar otros endpoints, como un GET para ver notificaciones pendientes,
+        // o para consultar el estado de una notificación en particular.
     }
 }

@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using NotificationService.Domain.Enums;
 using NotificationService.Models;
 
 namespace NotificationService.Validations
