@@ -1,55 +1,54 @@
 # 📬 Notification Microservice
 
-Microservicio de notificaciones desarrollado en ASP.NET Core 8, enfocado en simplicidad, extensibilidad y resiliencia.
+Microservicio de notificaciones desarrollado con **ASP.NET Core 8**, enfocado en **simplicidad**, **extensibilidad** y **resiliencia**.
 
+---
 
-✉️ Funcionalidades
+## ✉️ Funcionalidades
 
-Envío de emails utilizando System.Net.Mail (sin librerías externas como MailKit).
+- ✅ Envío de **emails** utilizando `System.Net.Mail` (sin dependencias externas como MailKit).  
+- 🕐 **Procesamiento asíncrono** mediante un `BackgroundService` (worker).
+- 📥 Encolado de notificaciones en memoria con `ConcurrentQueue`.
+- 🔁 **Política de reintentos** con [Polly](https://github.com/App-vNext/Polly) para fallos temporales.
+- 💾 Persistencia en **base de datos SQL** con control de estado (`Pending`, `Sent`, `Failed`).
+- 🧱 Estructura preparada para **SMS** (aún no implementado).
 
-Soporte para SMS (estructura preparada, aún no implementado).
+---
 
-Encolado de notificaciones en memoria mediante ConcurrentQueue.
+## 🧰 Arquitectura
 
-Política de reintentos con Polly para manejar errores temporales.
+- 🏭 Patrón **Factory** para instanciar dinámicamente el `NotificationSender` según canal (Email, SMS, etc).
+- 💡 Separación clara por responsabilidades mediante interfaces como:
+  - `INotificationSender`
+  - `INotificationSenderFactory`
+  - `INotificationQueue`
+- 🔌 Preparado para escalar a colas externas como **RabbitMQ**, **Azure Service Bus**, etc.
 
-Worker background que procesa las notificaciones de forma asíncrona.
+---
 
+## ❤️ Observabilidad
 
-🧰 Arquitectura
+- 🔍 **Health Checks** expuestos vía endpoints:
+  - `/health`: Estado general del microservicio.
+  - `/dashboard`: UI amigable para monitoreo.
+- ⚙️ HealthCheck **custom** para validar configuración SMTP.
 
-Patrón Factory para instanciar dinamicamente el NotificationSender correspondiente al canal (email, SMS, etc).
+---
 
-Separación clara por responsabilidad mediante interfaces:
-INotificationSender, INotificationSenderFactory, INotificationQueue
+## 🧪 Testing & Debug
 
-Preparado para escalar hacia colas persistentes como RabbitMQ o Azure Service Bus.
+- 🧾 Endpoint opcional para **listar notificaciones pendientes** (modo desarrollo).
+- 🧪 Posibilidad de insertar notificaciones manualmente en la cola para pruebas.
 
+---
 
-❤️ Observabilidad
+## 🏗️ Futuras mejoras
 
-Integración de Health Checks con endpoints:
+- 📈 Retry con **backoff exponencial**.
+- 📲 Implementación de canales adicionales: **SMS**, **Push Notifications**, etc.
+- 🔎 Middleware para trazabilidad (trace ID, correlation ID).
+- 📊 Integración con **logging avanzado** (Ej. Serilog, OpenTelemetry).
 
-/health: estado general del microservicio.
+---
 
-/dashboard: UI amigable para monitoreo de salud.
-
-HealthCheck personalizado para validar configuración SMTP.
-
-
-🔧 Testing & Debug
-
-Endpoint opcional para listar notificaciones pendientes (modo desarrollo).
-
-Posibilidad de dejar notificaciones encoladas manualmente para pruebas.
-
-
-🏗️ Futuras mejoras
-
-Persistencia de notificaciones (base de datos).
-
-Retry con backoff exponencial.
-
-Implementación de canales adicionales: SMS, Push, etc.
-
-Middleware de trazabilidad o logging avanzado.
+> Diseñado con foco en resiliencia y escalabilidad para integrarse fácilmente a cualquier arquitectura basada en microservicios.
