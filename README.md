@@ -1,54 +1,67 @@
 # 📬 Notification Microservice
 
-Microservicio de notificaciones desarrollado con **ASP.NET Core 8**, enfocado en **simplicidad**, **extensibilidad** y **resiliencia**.
+Microservicio de notificaciones desarrollado en **ASP.NET Core 8**, enfocado en simplicidad, extensibilidad y resiliencia.
 
 ---
 
 ## ✉️ Funcionalidades
 
-- ✅ Envío de **emails** utilizando `System.Net.Mail` (sin dependencias externas como MailKit).  
-- 🕐 **Procesamiento asíncrono** mediante un `BackgroundService` (worker).
-- 📥 Encolado de notificaciones en memoria con `ConcurrentQueue`.
-- 🔁 **Política de reintentos** con [Polly](https://github.com/App-vNext/Polly) para fallos temporales.
-- 💾 Persistencia en **base de datos SQL** con control de estado (`Pending`, `Sent`, `Failed`).
-- 🧱 Estructura preparada para **SMS** (aún no implementado).
+- Envío de emails utilizando `System.Net.Mail` (sin librerías externas como MailKit).
+- Soporte preparado para SMS (estructura creada, aún no implementado).
+- Encolado de notificaciones en memoria mediante `ConcurrentQueue`.
+- Política de reintentos con **Polly**, incluyendo *backoff exponencial*.
+- Worker en segundo plano que procesa las notificaciones de forma asíncrona.
+- Persistencia de notificaciones en base de datos SQL con estado de envío.
 
 ---
 
 ## 🧰 Arquitectura
 
-- 🏭 Patrón **Factory** para instanciar dinámicamente el `NotificationSender` según canal (Email, SMS, etc).
-- 💡 Separación clara por responsabilidades mediante interfaces como:
+- Patrón **Factory** para instanciar dinámicamente el `NotificationSender` correspondiente al canal (email, SMS, etc.).
+- Separación clara por responsabilidad mediante interfaces:
   - `INotificationSender`
   - `INotificationSenderFactory`
   - `INotificationQueue`
-- 🔌 Preparado para escalar a colas externas como **RabbitMQ**, **Azure Service Bus**, etc.
+- Preparado para escalar hacia colas persistentes como **RabbitMQ**, **Azure Service Bus**, etc.
 
 ---
 
 ## ❤️ Observabilidad
 
-- 🔍 **Health Checks** expuestos vía endpoints:
-  - `/health`: Estado general del microservicio.
-  - `/dashboard`: UI amigable para monitoreo.
-- ⚙️ HealthCheck **custom** para validar configuración SMTP.
+- Integración de **Health Checks** con endpoints:
+  - `/health`: estado general del microservicio.
+  - `/dashboard`: UI amigable para monitoreo de salud.
+- HealthCheck personalizado para validar la configuración SMTP.
 
 ---
 
-## 🧪 Testing & Debug
+## 🔧 Testing & Debug
 
-- 🧾 Endpoint opcional para **listar notificaciones pendientes** (modo desarrollo).
-- 🧪 Posibilidad de insertar notificaciones manualmente en la cola para pruebas.
+- Endpoint opcional para listar notificaciones pendientes (modo desarrollo).
+- Posibilidad de dejar notificaciones encoladas manualmente para pruebas rápidas.
+
+---
+
+## ⏱️ Manejo de Reintentos
+
+- Implementado mediante **Polly** con:
+  - Reintentos automáticos hasta 3 veces.
+  - **Backoff exponencial** entre intentos.
+  - Logging detallado por intento y error.
+- Las notificaciones que fallan se marcan como `Failed` en la base de datos, con conteo de reintentos.
 
 ---
 
 ## 🏗️ Futuras mejoras
 
-- 📈 Retry con **backoff exponencial**.
-- 📲 Implementación de canales adicionales: **SMS**, **Push Notifications**, etc.
-- 🔎 Middleware para trazabilidad (trace ID, correlation ID).
-- 📊 Integración con **logging avanzado** (Ej. Serilog, OpenTelemetry).
+- Retry con jitter aleatorio (para evitar picos simultáneos).
+- Implementación de nuevos canales: SMS real, Push Notifications, etc.
+- Integración con colas distribuidas (RabbitMQ, Azure Service Bus, Kafka).
+- Middleware de trazabilidad y logging centralizado (Serilog, OpenTelemetry).
 
 ---
 
-> Diseñado con foco en resiliencia y escalabilidad para integrarse fácilmente a cualquier arquitectura basada en microservicios.
+## 🚀 Ejecutar localmente
+
+```bash
+dotnet run --project NotificationService
