@@ -47,7 +47,7 @@ namespace NotificationService.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error sending notification");
-                return StatusCode(500, "Error al enviar la notificación");
+                return StatusCode(400, ex.Message);
             }
         }
 

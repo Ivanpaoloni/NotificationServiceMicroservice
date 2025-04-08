@@ -1,12 +1,12 @@
 ﻿using FluentValidation;
 using NotificationService.Domain.Enums;
-using NotificationService.Models;
+using NotificationService.Models.Dtos;
 
 namespace NotificationService.Validations
 {
-    public class NotificationRequestValidator : AbstractValidator<NotificationRequest>
+    public class NotificationRequestDtoValidator : AbstractValidator<NotificationRequestDto>
     {
-        public NotificationRequestValidator()
+        public NotificationRequestDtoValidator()
         {
             RuleFor(x => x.Recipient)
                 .NotEmpty()

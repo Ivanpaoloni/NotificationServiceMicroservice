@@ -8,12 +8,15 @@ namespace NotificationService.Policies
         public static AsyncRetryPolicy GetDefaultRetryPolicy(ILogger logger)
         {
             return Policy
-                .Handle<Exception>().WaitAndRetryAsync(
+                .Handle<Exception>()
+                .WaitAndRetryAsync(
                     retryCount: 3,
-                    sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                    onRetry: (exception, timeSpan, retryCount, context) =>
+                    sleepDurationProvider: attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
+                    onRetry: (exception, timespan, retryCount, context) =>
                     {
-                        logger.LogWarning(exception, "Retry {RetryCount} after {Delay} due to error: {Message}", retryCount, timeSpan, exception.Message);
+                        logger.LogWarning(exception,
+                            "Retry {RetryCount} after {Delay} due to: {Message}",
+                            retryCount, timespan, exception.Message);
                     });
         }
     }

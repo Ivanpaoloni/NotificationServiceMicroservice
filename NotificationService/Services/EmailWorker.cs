@@ -23,7 +23,7 @@ namespace NotificationService.Services
                 {
                     try
                     {
-                        await _sender.SendAsync(request!.Recipient, request.Subject, request.Message);
+                        await _sender.SendAsync(request!);
                     }
                     catch (Exception ex)
                     {

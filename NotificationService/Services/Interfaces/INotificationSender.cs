@@ -1,7 +1,9 @@
-﻿namespace NotificationService.Services.Interfaces
+﻿using NotificationService.Models;
+
+namespace NotificationService.Services.Interfaces
 {
     public interface INotificationSender
     {
-        Task SendAsync(string recipient, string subject, string message);
+        Task SendAsync(NotificationRequest notificationRequest);
     }
 }

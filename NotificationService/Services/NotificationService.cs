@@ -1,5 +1,5 @@
-﻿using FluentValidation;
-using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using FluentValidation;
 using NotificationService.Domain.Entities;
 using NotificationService.Domain.Enums;
 using NotificationService.Infrastructure;
@@ -15,25 +15,28 @@ namespace NotificationService.Services
         private readonly ILogger<NotificationService> _logger;
         private readonly NotificationDbContext _notificationDbContext;
         private readonly INotificationQueue _notificationQueue;
-        public NotificationService(ILogger<NotificationService> logger, INotificationQueue emailQueue, NotificationDbContext notificationDbContext)
+        private readonly IMapper _mapper;
+        public NotificationService(ILogger<NotificationService> logger, INotificationQueue emailQueue, NotificationDbContext notificationDbContext, IMapper mapper)
         {
             _logger = logger;
             _notificationQueue = emailQueue;
             this._notificationDbContext = notificationDbContext;
+            _mapper = mapper;
         }
         public async Task<Guid> SendNotificationAsync(NotificationRequestDto dto)
         {
-            //new NotificationRequestValidator().ValidateAndThrow(dto); // Si querés validar el DTO
+            new NotificationRequestDtoValidator().ValidateAndThrow(dto);
 
-            var id = Guid.NewGuid();
+            NotificationRequest notificationRequest = _mapper.Map<NotificationRequest>(dto);
+            notificationRequest.Id = Guid.NewGuid();
 
-            var notification = new NotificationMessage
+            NotificationMessage notification = new NotificationMessage
             {
-                Id = id,
-                Channel = dto.Channel,
-                Recipient = dto.Recipient,
-                Subject = dto.Subject,
-                Message = dto.Message,
+                Id = notificationRequest.Id,
+                Channel = notificationRequest.Channel,
+                Recipient = notificationRequest.Recipient,
+                Subject = notificationRequest.Subject,
+                Message = notificationRequest.Message,
                 Status = NotificationStatusTypeEnum.Pending,
                 RetryCount = 0,
                 CreatedAt = DateTime.UtcNow
@@ -42,26 +45,9 @@ namespace NotificationService.Services
             await _notificationDbContext.NotificationMessages.AddAsync(notification);
             await _notificationDbContext.SaveChangesAsync();
 
-            _notificationQueue.Enqueue(new NotificationRequest
-            {
-                Id = id,
-                Channel = dto.Channel,
-                Recipient = dto.Recipient,
-                Subject = dto.Subject,
-                Message = dto.Message
-            });
+            _notificationQueue.Enqueue(notificationRequest);
 
-            return id;
-        }
-
-        public Task SendAsync(NotificationRequest request)
-        {
-            new NotificationRequestValidator().ValidateAndThrow(request);
-
-            _notificationQueue.Enqueue(request);
-            _logger.LogInformation("Sending notification using {Channel} channel", request.Channel.ToString());
-
-            return Task.CompletedTask;
+            return notificationRequest.Id;
         }
     }
 }

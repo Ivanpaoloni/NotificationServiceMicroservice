@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using NotificationService.Configuration;
+using NotificationService.Models;
 using NotificationService.Services.Interfaces;
 using System.Net;
 using System.Net.Mail;
@@ -16,7 +17,7 @@ namespace NotificationService.Services
             _logger = logger;
         }
 
-        public async Task SendAsync(string recipient, string subject, string message)
+        public async Task SendAsync(NotificationRequest request)
         {
             try
             {
@@ -29,19 +30,19 @@ namespace NotificationService.Services
                 var mailMessage = new MailMessage
                 {
                     From = new MailAddress(_smtpSettings.SenderEmail, _smtpSettings.SenderName),
-                    Subject = subject,
-                    Body = message,
+                    Subject = request.Subject,
+                    Body = request.Message,
                     IsBodyHtml = false
                 };
 
-                mailMessage.To.Add(new MailAddress(recipient));
+                mailMessage.To.Add(new MailAddress(request.Recipient));
                 await client.SendMailAsync(mailMessage);
 
-                _logger.LogInformation("Email sent to {Recipient} with subject {Subject}", recipient, subject);
+                _logger.LogInformation("Email sent to {Recipient} with subject {Subject}", request.Recipient, request.Subject);
             }
             catch (SmtpException ex)
             {
-                _logger.LogError(ex, "Failed to send email to {Recipient}", recipient);
+                _logger.LogError(ex, "Failed to send email to {Recipient}", request.Recipient);
                 throw;
             }
         }
