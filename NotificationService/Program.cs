@@ -19,6 +19,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//configure secrets
+builder.Configuration.AddUserSecrets<Program>();
+
 //Configure DbContext
 builder.Services.AddDbContext<NotificationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -27,6 +30,7 @@ builder.Services.AddDbContext<NotificationDbContext>(options =>
 //Configure ServiceProvider
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
 builder.Services.Configure<NotificationSettings>(builder.Configuration.GetSection("Notification"));
+builder.Services.Configure<TwilioSettings>(builder.Configuration.GetSection("Twilio"));
 
 //Configure AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -50,7 +54,9 @@ builder.Services.AddSingleton<WorkerStatusService>();
 //Configure HealthChecks
 builder.Services.AddHealthChecks().AddCheck<CustomSmtpHealthCheck>("smtp");
 builder.Services.AddHealthChecks().AddCheck<CustomDbHealthCheck>("SQL Database");
-builder.Services.AddHealthChecks().AddCheck<NotificationWorkerHealthCheck>("NotificationWorker");
+builder.Services.AddHealthChecks().AddCheck<NotificationWorkerHealthCheck>("NotificationWorker"); 
+builder.Services.AddHealthChecks().AddCheck<TwilioHealthCheck>("Twilio_SMS");
+
 builder.Services.AddHealthChecksUI().AddInMemoryStorage();
 
 builder.Services.AddCors(options =>
