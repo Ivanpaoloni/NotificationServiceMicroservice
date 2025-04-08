@@ -12,6 +12,7 @@ Microservicio de notificaciones desarrollado en **ASP.NET Core 8**, enfocado en 
 - Política de reintentos con **Polly**, incluyendo *backoff exponencial*.
 - Worker en segundo plano que procesa las notificaciones de forma asíncrona.
 - Persistencia de notificaciones en base de datos SQL con estado de envío.
+- Estados posibles: `Pending`, `Processing`, `Sent`, `Failed`, `Cancelled`.
 
 ---
 
@@ -49,6 +50,7 @@ Microservicio de notificaciones desarrollado en **ASP.NET Core 8**, enfocado en 
   - **Backoff exponencial** entre intentos.
   - Logging detallado por intento y error.
 - Las notificaciones que fallan se marcan como `Failed` en la base de datos, con conteo de reintentos.
+- Las notificaciones que aún no fueron procesadas o fallaron, se vuelven a encolar si tienen menos de 3 reintentos.
 
 ---
 
@@ -58,6 +60,7 @@ Microservicio de notificaciones desarrollado en **ASP.NET Core 8**, enfocado en 
 - Implementación de nuevos canales: SMS real, Push Notifications, etc.
 - Integración con colas distribuidas (RabbitMQ, Azure Service Bus, Kafka).
 - Middleware de trazabilidad y logging centralizado (Serilog, OpenTelemetry).
+- Persistencia de la cola (para evitar pérdida de mensajes ante reinicios).
 
 ---
 
