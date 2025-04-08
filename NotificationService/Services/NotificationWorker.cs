@@ -1,6 +1,11 @@
-﻿using NotificationService.Infrastructure;
+﻿using Microsoft.EntityFrameworkCore;
+using NotificationService.Domain.Entities;
+using NotificationService.Domain.Enums;
+using NotificationService.Infrastructure;
+using NotificationService.Models;
 using NotificationService.Policies;
 using NotificationService.Services.Interfaces;
+using Polly.Retry;
 
 namespace NotificationService.Services
 {
@@ -9,6 +14,8 @@ namespace NotificationService.Services
         private readonly INotificationQueue _queue;
         private readonly ILogger<NotificationWorker> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
+        private DateTime _lastDbCheck = DateTime.MinValue;
+        private static readonly TimeSpan _dbCheckInterval = TimeSpan.FromSeconds(30); // Intervalo para verificar la base de datos
 
         public NotificationWorker(INotificationQueue queue, IServiceScopeFactory scopeFactory, ILogger<NotificationWorker> logger)
         {
@@ -21,14 +28,49 @@ namespace NotificationService.Services
         {
             while (!stoppingToken.IsCancellationRequested)
             {
+                using var scope = _scopeFactory.CreateScope();
+                NotificationDbContext dbContext = scope.ServiceProvider.GetRequiredService<NotificationDbContext>();
+                INotificationSenderFactory senderFactory = scope.ServiceProvider.GetRequiredService<INotificationSenderFactory>();
+
+                if (DateTime.UtcNow - _lastDbCheck >= _dbCheckInterval)
+                {
+                    _lastDbCheck = DateTime.UtcNow;
+
+                    var pendingNotifications = await dbContext.NotificationMessages
+                        .Where(n => n.Status == NotificationStatusTypeEnum.Pending ||
+                                    (n.Status == NotificationStatusTypeEnum.Failed && n.RetryCount < 3))
+                        .OrderBy(n => n.CreatedAt)
+                        .Take(10) // Limitamos para evitar encolar de más
+                        .ToListAsync(stoppingToken);
+
+                    if (pendingNotifications.Count == 0)
+                    {
+
+                        _logger.LogInformation("No pending notifications to process");
+                        await Task.Delay(1000, stoppingToken); // Esperar un segundo si no hay notificaciones pendientes
+                        continue;
+                    }
+
+                    // Encolar las notificaciones pendientes
+                    _logger.LogInformation("Found {Count} pending notifications to process", pendingNotifications.Count);
+                    foreach (var notification in pendingNotifications)
+                    {
+                        _queue.Enqueue(new NotificationRequest
+                        {
+                            Id = notification.Id,
+                            Channel = notification.Channel,
+                            Recipient = notification.Recipient,
+                            Subject = notification.Subject,
+                            Message = notification.Message
+                        });
+                    }
+                }
+
+                // Procesar la cola de notificaciones
                 if (_queue.TryDequeue(out var request))
                 {
-                    using var scope = _scopeFactory.CreateScope();
-                    var senderFactory = scope.ServiceProvider.GetRequiredService<INotificationSenderFactory>();
-                    var sender = senderFactory.GetSender(request!.Channel);
-                    var dbContext = scope.ServiceProvider.GetRequiredService<NotificationDbContext>();
-
-                    var retryPolicy = NotificationRetryPolicies.GetDefaultRetryPolicy(_logger);
+                    INotificationSender sender = senderFactory.GetSender(request!.Channel);
+                    AsyncRetryPolicy retryPolicy = NotificationRetryPolicies.GetDefaultRetryPolicy(_logger);
 
                     try
                     {
@@ -36,10 +78,10 @@ namespace NotificationService.Services
                         {
                             await sender.SendAsync(request.Recipient, request.Subject, request.Message);
                         });
-                        var entity = await dbContext.NotificationMessages.FindAsync(request.Id);
+                        NotificationMessage? entity = await dbContext.NotificationMessages.FindAsync(request.Id);
                         if (entity != null)
                         {
-                            entity.Status = Domain.Enums.NotificationStatusTypeEnum.Sent;
+                            entity.Status = NotificationStatusTypeEnum.Sent;
                             entity.SentAt = DateTime.UtcNow;
                             await dbContext.SaveChangesAsync();
                         }
@@ -48,10 +90,10 @@ namespace NotificationService.Services
                     }
                     catch (Exception ex)
                     {
-                        var entity = await dbContext.NotificationMessages.FindAsync(request.Id);
+                        NotificationMessage? entity = await dbContext.NotificationMessages.FindAsync(request.Id);
                         if (entity != null)
                         {
-                            entity.Status = Domain.Enums.NotificationStatusTypeEnum.Failed;
+                            entity.Status = NotificationStatusTypeEnum.Failed;
                             entity.RetryCount++;
                             await dbContext.SaveChangesAsync();
                         }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NotificationService.Infrastructure;
 
@@ -11,9 +12,11 @@ using NotificationService.Infrastructure;
 namespace NotificationService.Migrations
 {
     [DbContext(typeof(NotificationDbContext))]
-    partial class NotificationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250408135909_UpdateNotificationEntity")]
+    partial class UpdateNotificationEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,7 +65,7 @@ namespace NotificationService.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("NotificationMessages", "dbo");
+                    b.ToTable("NotificationMessages", "Administrator");
                 });
 #pragma warning restore 612, 618
         }

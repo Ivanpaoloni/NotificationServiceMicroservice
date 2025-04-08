@@ -8,7 +8,7 @@ namespace NotificationService.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<NotificationMessage> builder)
         {
-            builder.ToTable("NotificationMessages");
+            builder.ToTable("NotificationMessages", "dbo");
 
             builder.HasKey(n => n.Id);
             builder.Property(n => n.Channel).IsRequired().HasColumnType("smallint");
@@ -19,6 +19,7 @@ namespace NotificationService.Infrastructure.Configurations
             builder.Property(n => n.RetryCount).IsRequired().HasColumnType("smallint");
             builder.Property(n => n.CreatedAt).IsRequired().HasColumnType("datetime");
             builder.Property(n => n.SentAt).HasColumnType("datetime");
+            builder.Property(n => n.LastTriedAt).HasColumnType("datetime");
         }
     }
 }

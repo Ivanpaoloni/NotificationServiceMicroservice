@@ -12,6 +12,7 @@ namespace NotificationService.Domain.Entities
         public NotificationStatusTypeEnum Status { get; set; }
         public int RetryCount { get; set; }
         public DateTime CreatedAt { get; set; }
+        public DateTime? LastTriedAt { get; set; }
         public DateTime? SentAt { get; set; }
     }
 }
