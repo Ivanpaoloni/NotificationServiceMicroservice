@@ -39,6 +39,7 @@ dotnet user-secrets set "Twilio:FromPhone" "+123456789"
 ```
 
 ## 🌐 Variables de entorno (producción)
+
 O usar servicios como:
 
 Azure Key Vault
@@ -49,7 +50,8 @@ HashiCorp Vault
 
 ⚠️ Si accidentalmente subís un secreto, GitHub puede bloquear el push. Se recomienda hacer `git rebase -i` o `git filter-repo` para eliminarlo del historial.
 
-##❤️ Observabilidad
+## ❤️ Observabilidad
+
 ✔️ Health Checks integrados:
 
 `/health`: estado general del microservicio.
@@ -70,7 +72,8 @@ OpenTelemetry
 
 Prometheus + Grafana
 
-##🔧 Testing & Debug
+## 🔧 Testing & Debug
+
 Endpoint opcional en desarrollo para inspeccionar notificaciones pendientes.
 
 Posibilidad de enviar notificaciones manualmente desde Swagger o Postman.
