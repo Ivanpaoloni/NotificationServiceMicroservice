@@ -80,7 +80,7 @@ Posibilidad de enviar notificaciones manualmente desde Swagger o Postman.
 
 Control total sobre la inyección de fallas y verificación de reintentos.
 
-⏱️ Manejo de Reintentos
+## ⏱️ Manejo de Reintentos
 Implementado mediante Polly:
 
 Hasta 3 reintentos automáticos.
@@ -93,7 +93,7 @@ Las notificaciones con error se marcan como Failed y se persisten con cantidad d
 
 Las fallidas con menos de 3 intentos vuelven a encolarse para reintentar luego.
 
-🏗️ Futuras mejoras
+## 🏗️ Futuras mejoras
 Retry con jitter aleatorio (para evitar reintentos simultáneos).
 
 Nuevos canales: Push Notifications, WhatsApp, etc.
