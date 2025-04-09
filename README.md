@@ -106,9 +106,8 @@ Dashboard en tiempo real con métricas e historial.
 
 Middleware de trazabilidad para logs correlacionados (RequestId, etc.).
 
-🚀 Ejecutar localmente
-bash
-Copiar
-Editar
-dotnet run --project NotificationService
+## 🚀 Ejecutar localmente
+
+`dotnet run --project NotificationService`
+
 ✅ Asegurate de tener configurados los secrets previamente (SMTP y/o Twilio).
