@@ -7,7 +7,7 @@ Microservicio de notificaciones desarrollado en **ASP.NET Core 8**, enfocado en 
 ## ✉️ Funcionalidades
 
 - Envío de emails utilizando `System.Net.Mail` (sin librerías externas como MailKit).
-- Soporte preparado para SMS (estructura creada, aún no implementado).
+- Soporte preparado para **SMS** mediante estructura extensible (sin integración activa por seguridad).
 - Encolado de notificaciones en memoria mediante `ConcurrentQueue`.
 - Política de reintentos con **Polly**, incluyendo *backoff exponencial*.
 - Worker en segundo plano que procesa las notificaciones de forma asíncrona.
@@ -57,7 +57,7 @@ Microservicio de notificaciones desarrollado en **ASP.NET Core 8**, enfocado en 
 ## 🏗️ Futuras mejoras
 
 - Retry con jitter aleatorio (para evitar picos simultáneos).
-- Implementación de nuevos canales: SMS real, Push Notifications, etc.
+- Implementación real de canales adicionales: SMS (Twilio), Push Notifications, etc.
 - Integración con colas distribuidas (RabbitMQ, Azure Service Bus, Kafka).
 - Middleware de trazabilidad y logging centralizado (Serilog, OpenTelemetry).
 - Persistencia de la cola (para evitar pérdida de mensajes ante reinicios).
