@@ -53,7 +53,7 @@ builder.Services.AddSingleton<WorkerStatusService>();
 
 //Configure HealthChecks
 builder.Services.AddHealthChecks().AddCheck<CustomSmtpHealthCheck>("smtp");
-builder.Services.AddHealthChecks().AddCheck<CustomDbHealthCheck>("SQL Database");
+builder.Services.AddHealthChecks().AddDbContextCheck<NotificationDbContext>("SQL Database");
 builder.Services.AddHealthChecks().AddCheck<NotificationWorkerHealthCheck>("NotificationWorker"); 
 builder.Services.AddHealthChecks().AddCheck<TwilioHealthCheck>("Twilio_SMS");
 
@@ -82,4 +82,24 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 app.MapControllers();
+
+//connectionString validation
+try
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<NotificationDbContext>();
+
+    if (!dbContext.Database.CanConnect())
+    {
+        Console.WriteLine("No se puede conectar con la base de datos. Verificá la cadena de conexión.");
+        return;
+    }
+    //dbContext.Database.Migrate();
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Error de inicio: {ex.Message}");
+    return;
+}
+
 app.Run();
