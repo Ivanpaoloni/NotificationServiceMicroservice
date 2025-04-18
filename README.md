@@ -3,6 +3,7 @@
 Microservicio de notificaciones desarrollado en **ASP.NET Core 8**, enfocado en simplicidad, extensibilidad y resiliencia.
 
 ---
+![image](https://github.com/user-attachments/assets/7969b5ec-a84a-4a90-ba94-51f15580781d)
 
 ## ✉️ Funcionalidades
 
