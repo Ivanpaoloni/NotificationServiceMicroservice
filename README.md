@@ -37,6 +37,8 @@ Microservicio de notificaciones desarrollado en **ASP.NET Core 8**, enfocado en 
 dotnet user-secrets set "Twilio:AccountSid" "TU_SID"
 dotnet user-secrets set "Twilio:AuthToken" "TU_TOKEN"
 dotnet user-secrets set "Twilio:FromPhone" "+123456789"
+dotnet user-secrets set "Smtp:User" "TU_USER"
+dotnet user-secrets set "Smtp:Password" "TU_PASSWORD"
 ```
 
 ## 🌐 Variables de entorno (producción)
