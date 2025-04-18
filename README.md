@@ -41,18 +41,6 @@ dotnet user-secrets set "Smtp:User" "TU_USER"
 dotnet user-secrets set "Smtp:Password" "TU_PASSWORD"
 ```
 
-## 🌐 Variables de entorno (producción)
-
-O usar servicios como:
-
-Azure Key Vault
-
-AWS Secrets Manager
-
-HashiCorp Vault
-
-⚠️ Si accidentalmente subís un secreto, GitHub puede bloquear el push. Se recomienda hacer `git rebase -i` o `git filter-repo` para eliminarlo del historial.
-
 ## ❤️ Observabilidad
 
 ✔️ Health Checks integrados:
