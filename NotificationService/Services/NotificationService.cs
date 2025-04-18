@@ -26,29 +26,39 @@ namespace NotificationService.Services
 
         public async Task<Guid> SendNotificationAsync(NotificationRequestDto dto)
         {
-            new NotificationRequestDtoValidator().ValidateAndThrow(dto);
-
-            NotificationRequest notificationRequest = _mapper.Map<NotificationRequest>(dto);
-            notificationRequest.Id = Guid.NewGuid();
-
-            NotificationMessage notification = new NotificationMessage
+            try
             {
-                Id = notificationRequest.Id,
-                Channel = notificationRequest.Channel,
-                Recipient = notificationRequest.Recipient,
-                Subject = notificationRequest.Subject,
-                Message = notificationRequest.Message,
-                Status = NotificationStatusTypeEnum.Pending,
-                RetryCount = 0,
-                CreatedAt = DateTime.UtcNow
-            };
 
-            await _notificationDbContext.NotificationMessages.AddAsync(notification);
-            await _notificationDbContext.SaveChangesAsync();
+                new NotificationRequestDtoValidator().ValidateAndThrow(dto);
 
-            _notificationQueue.Enqueue(notificationRequest);
+                NotificationRequest notificationRequest = _mapper.Map<NotificationRequest>(dto);
+                notificationRequest.Id = Guid.NewGuid();
 
-            return notificationRequest.Id;
+                NotificationMessage notification = new NotificationMessage
+                {
+                    Id = notificationRequest.Id,
+                    Channel = notificationRequest.Channel,
+                    Recipient = notificationRequest.Recipient,
+                    Subject = notificationRequest.Subject,
+                    Message = notificationRequest.Message,
+                    Status = NotificationStatusTypeEnum.Pending,
+                    RetryCount = 0,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                await _notificationDbContext.NotificationMessages.AddAsync(notification);
+                await _notificationDbContext.SaveChangesAsync();
+
+                _notificationQueue.Enqueue(notificationRequest);
+                _logger.LogInformation("Notification {Id} queued for sending", notificationRequest.Id);
+
+                return notificationRequest.Id;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while sending notification");
+                throw;
+            }
         }
 
         public IEnumerable<NotificationMessageDto> GetPendingNotifications()

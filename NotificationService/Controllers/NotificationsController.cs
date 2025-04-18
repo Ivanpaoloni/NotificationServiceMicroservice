@@ -9,14 +9,12 @@ namespace NotificationService.Controllers
     public class NotificationsController : ControllerBase
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly ILogger<NotificationsController> _logger;
         private readonly INotificationService _notificationService;
 
-        public NotificationsController(IServiceProvider serviceProvider, INotificationService notificationService, ILogger<NotificationsController> logger)
+        public NotificationsController(IServiceProvider serviceProvider, INotificationService notificationService)
         {
             _serviceProvider = serviceProvider;
             _notificationService = notificationService;
-            _logger = logger;
         }
 
         [HttpGet("pending")]
@@ -36,7 +34,6 @@ namespace NotificationService.Controllers
 
             return Ok(pending);
         }
-
 
         [HttpGet("{id}")]
         public IActionResult GetNotificationById(Guid id)
@@ -68,7 +65,6 @@ namespace NotificationService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error sending notification");
                 return StatusCode(400, ex.Message);
             }
         }
