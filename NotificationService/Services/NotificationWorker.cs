@@ -42,7 +42,7 @@ namespace NotificationService.Services
                     _lastDbCheck = DateTime.UtcNow;
 
                     //get pending notifications from the database
-                    var pendingNotifications = await dbContext.NotificationMessages
+                    List<NotificationMessage> pendingNotifications = await dbContext.NotificationMessages
                         .Where(n => n.Status == NotificationStatusTypeEnum.Pending ||
                                     (n.Status == NotificationStatusTypeEnum.Failed && n.RetryCount < 3))
                         .OrderBy(n => n.CreatedAt)
@@ -61,7 +61,7 @@ namespace NotificationService.Services
 
                     // Enqueue pending notifications
                     _logger.LogInformation("Found {Count} pending notifications to process", pendingNotifications.Count);
-                    foreach (var notification in pendingNotifications)
+                    foreach (NotificationMessage notification in pendingNotifications)
                     {
                         notification.Status = NotificationStatusTypeEnum.Processing;
 
@@ -79,7 +79,7 @@ namespace NotificationService.Services
                 }
 
                 // Dequeue and process notifications
-                if (_queue.TryDequeue(out var request))
+                if (_queue.TryDequeue(out NotificationRequest? request))
                 {
                     INotificationSender sender = senderFactory.GetSender(request!.Channel);
                     AsyncRetryPolicy retryPolicy = NotificationRetryPolicies.GetDefaultRetryPolicy(_logger);

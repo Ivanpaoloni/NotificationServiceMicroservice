@@ -23,6 +23,7 @@ namespace NotificationService.Services
             this._notificationDbContext = notificationDbContext;
             _mapper = mapper;
         }
+
         public async Task<Guid> SendNotificationAsync(NotificationRequestDto dto)
         {
             new NotificationRequestDtoValidator().ValidateAndThrow(dto);
@@ -48,6 +49,34 @@ namespace NotificationService.Services
             _notificationQueue.Enqueue(notificationRequest);
 
             return notificationRequest.Id;
+        }
+
+        public IEnumerable<NotificationMessageDto> GetPendingNotifications()
+        {
+            IEnumerable<NotificationMessageDto> notifications = _mapper.Map<IEnumerable<NotificationMessageDto>>(_notificationQueue.GetPendingNotifications());
+
+            foreach (var notification in notifications)
+            {
+                notification.Status = NotificationStatusTypeEnum.Pending;
+            }
+
+            return notifications;
+        }
+        public async Task<NotificationMessageDto?> GetStoredNotificationById(Guid id)
+        {
+            NotificationMessageDto? notification = _mapper.Map<NotificationMessageDto>(_notificationQueue.GetPendingNotificationById(id));
+
+            if (notification != null)
+            {
+                notification.Status = NotificationStatusTypeEnum.Pending;
+            }
+
+            if (notification == null)
+            {
+                notification = _mapper.Map<NotificationMessageDto>(await _notificationDbContext.NotificationMessages.FindAsync(id));
+            }
+
+            return notification;
         }
     }
 }

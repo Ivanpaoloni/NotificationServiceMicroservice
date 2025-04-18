@@ -6,6 +6,7 @@ namespace NotificationService.Services.Interfaces
     {
         void Enqueue(NotificationRequest request);
         bool TryDequeue(out NotificationRequest? request);
-        IReadOnlyCollection<NotificationRequest> GetPendingNotifications();
+        IEnumerable<NotificationRequest> GetPendingNotifications();
+        NotificationRequest? GetPendingNotificationById(Guid id);
     }
 }

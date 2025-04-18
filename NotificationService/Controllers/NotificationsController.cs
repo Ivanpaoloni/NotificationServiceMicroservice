@@ -1,6 +1,4 @@
-﻿using Humanizer;
-using Microsoft.AspNetCore.Mvc;
-using NotificationService.Models;
+﻿using Microsoft.AspNetCore.Mvc;
 using NotificationService.Models.Dtos;
 using NotificationService.Services.Interfaces;
 
@@ -13,22 +11,46 @@ namespace NotificationService.Controllers
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<NotificationsController> _logger;
         private readonly INotificationService _notificationService;
-        private readonly INotificationQueue _notificationQueue;
 
-        public NotificationsController(IServiceProvider serviceProvider, INotificationService notificationService, INotificationQueue notificationQueue, ILogger<NotificationsController> logger)
+        public NotificationsController(IServiceProvider serviceProvider, INotificationService notificationService, ILogger<NotificationsController> logger)
         {
             _serviceProvider = serviceProvider;
             _notificationService = notificationService;
-            _notificationQueue = notificationQueue;
             _logger = logger;
         }
 
         [HttpGet("pending")]
         public IActionResult GetPendingNotifications()
         {
-            var pending =_notificationQueue.GetPendingNotifications();
-            return Ok(new { success = "true", status = "Pending", pending });
+            IEnumerable<NotificationMessageDto> pending = _notificationService.GetPendingNotifications();
+
+            if (pending == null)
+            {
+                return NotFound(new { success = "false", status = "Not Found" });
+            }
+
+            else if (pending.Count() == 0)
+            {
+                return NoContent();
+            }
+
+            return Ok(pending);
         }
+
+
+        [HttpGet("{id}")]
+        public IActionResult GetNotificationById(Guid id)
+        {
+            NotificationMessageDto? notification = _notificationService.GetStoredNotificationById(id).Result;
+
+            if (notification == null)
+            {
+                return NotFound(new { success = "false", status = "Not Found" });
+            }
+
+            return Ok(notification);
+        }
+
         [HttpPost("send")]
         public async Task<IActionResult> SendNotification([FromBody] NotificationRequestDto dto)
         {
@@ -50,8 +72,5 @@ namespace NotificationService.Controllers
                 return StatusCode(400, ex.Message);
             }
         }
-
-        // Podrías agregar otros endpoints, como un GET para ver notificaciones pendientes,
-        // o para consultar el estado de una notificación en particular.
     }
 }

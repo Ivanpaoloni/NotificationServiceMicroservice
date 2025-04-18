@@ -11,6 +11,7 @@ using NotificationService.Models.Dtos;
 using NotificationService.Services;
 using NotificationService.Services.Interfaces;
 using NotificationService.Validations;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,11 @@ builder.Configuration.AddUserSecrets<Program>();
 builder.Services.AddDbContext<NotificationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 //Configure ServiceProvider
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));

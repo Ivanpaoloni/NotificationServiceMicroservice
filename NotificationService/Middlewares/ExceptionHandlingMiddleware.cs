@@ -8,6 +8,13 @@ namespace NotificationService.Middlewares
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
+        //Global error handler middleware
+
+        // This middleware will catch all unhandled exceptions in the pipeline
+        // and log them, returning a generic error response to the client.
+        // It should be registered in the pipeline before any other middleware that handles exceptions.
+        // This is a good place to log the exception and return a generic error response.
+       
         public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
         {
             _next = next;

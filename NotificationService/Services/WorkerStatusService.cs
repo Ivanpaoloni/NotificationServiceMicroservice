@@ -2,6 +2,7 @@
 {
     public class WorkerStatusService
     {
+        // This class is used for healthcheck to track the status of the worker. 
         public DateTime LastExecutionTime { get; set; } = DateTime.MinValue;
         public bool LastExecutionFailed { get; set; } = false;
 
